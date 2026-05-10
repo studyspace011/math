@@ -3,268 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Mastery Pro - Multi-User</title>
+    <title>Math Base Pro - Ultimate</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #2563eb; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
-            --dark: #1e293b; --light: #f8fafc;
+            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
+            --primary: #2563eb; --fast: #22c55e; --mid: #f59e0b; --slow: #ef4444;
         }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 10px; display: flex; justify-content: center; }
-        .container { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 900px; min-height: 80vh; }
-        .screen { display: none; animation: fadeIn 0.3s ease; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Inputs & Buttons */
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 1rem; box-sizing: border-box; }
-        button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-secondary { background: #64748b; }
-
-        /* Game UI */
-        .stats-header { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-        .question-text { font-size: 4rem; font-weight: 800; margin: 30px 0; color: var(--dark); text-shadow: 2px 2px 0px #e2e8f0; }
-        #timerDisplay { font-family: monospace; font-size: 1.5rem; color: var(--danger); }
-
-        /* Dashboard & Leaderboard */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; background: #fff; }
-        .badge-icon { font-size: 2rem; margin: 5px; display: inline-block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --border: #334155;
+            --primary: #3b82f6;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: 0.3s; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         
-        .user-tag { background: #dbeafe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .screen { display: none; }
+        .active { display: block; }
+
+        button { padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; margin: 5px 0; width: 100%; }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-dl { background: #059669; color: white; margin-top: 15px; }
+
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); }
+
+        .question-box { font-size: 4rem; font-weight: 800; text-align: center; margin: 40px 0; }
+        .timer-bar { display: flex; justify-content: space-between; font-weight: bold; background: var(--bg); padding: 10px; border-radius: 8px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: center; }
+        
+        .tag { padding: 4px 8px; border-radius: 6px; color: white; font-weight: bold; font-size: 0.85rem; }
+        .mode-toggle { cursor: pointer; font-size: 1.5rem; background: none; border: none; color: var(--text); width: auto; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- User Login Screen -->
-    <div id="loginScreen" class="screen active">
-        <h1>Math Mastery 🚀</h1>
-        <p>Apna Naam Enter Karein ya Profile Chunein:</p>
-        <input type="text" id="userNameInput" placeholder="Aapka Naam...">
-        <div id="existingUsers" style="margin: 10px 0;"></div>
-        <button onclick="login()">Start Practice</button>
+    <div class="header">
+        <h2 style="margin:0;">Math Strong 🚀</h2>
+        <button class="mode-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
     </div>
 
-    <!-- Main Menu -->
-    <div id="menuScreen" class="screen">
-        <h2>Namaste, <span id="displayUserName" class="user-tag"></span>!</h2>
-        <div class="card">
-            <label>Select Stage:</label>
-            <select id="stageSelect">
-                <option value="1">Stage 1: Single Digit (Base Strong)</option>
-                <option value="2">Stage 2: Double Digit Sum</option>
-                <option value="3">Stage 3: Base Numbers (10, 20, 50...)</option>
-                <option value="4">Stage 4: Sum Under 100 (Mental Speed)</option>
-                <option value="5">Stage 5: Double Digit 100+ (Carry Over)</option>
-                <option value="6">Stage 6: Near Base (295, 399...)</option>
-                <option value="7">Stage 7: 3+4 Digit (Advanced)</option>
-            </select>
-            <label>Sawal ki Sankhya:</label>
-            <input type="number" id="qCount" value="10" min="5">
-            <button onclick="startTest()">Start Training</button>
-        </div>
-        <div class="grid">
-            <button class="btn-secondary" onclick="showDashboard()">My Progress & Badges</button>
-            <button class="btn-secondary" onclick="showLeaderboard()">Local Leaderboard</button>
-        </div>
-        <button onclick="logout()" style="background:none; color:var(--danger); border:1px solid var(--danger); margin-top:20px;">Switch User</button>
+    <!-- Setup Screen -->
+    <div id="setup" class="screen active">
+        <label>Stage Select:</label>
+        <select id="stageSelect">
+            <option value="1">Stage 1: Single Digit</option>
+            <option value="2">Stage 2: Double Digit</option>
+            <option value="3">Stage 3: Base Numbers (10, 20, 50...)</option>
+            <option value="4">Stage 4: Under 100 Sum</option>
+            <option value="5">Stage 5: Double Digit 100+</option>
+            <option value="6">Stage 6: Near Base (295, 399...)</option>
+            <option value="7">Stage 7: 3+4 Digit Sum</option>
+        </select>
+        <label>Questions Count:</label>
+        <input type="number" id="qCount" value="10" min="1">
+        <button class="btn-main" onclick="startTest()">Start Training</button>
+        <button class="btn-outline" onclick="showHistory()">View Long-Term Progress</button>
     </div>
 
     <!-- Game Screen -->
-    <div id="gameScreen" class="screen">
-        <div class="stats-header">
-            <div>Q: <span id="qNum">1</span>/<span id="qTotal">10</span></div>
-            <div id="timerDisplay">0.0s</div>
+    <div id="game" class="screen">
+        <div class="timer-bar">
+            <span>Q: <span id="qNum">1</span>/<span id="qTotal">10</span></span>
+            <span id="liveTimer" style="color:var(--slow)">0.0s</span>
         </div>
-        <div id="questionDisplay" class="question-text">-- + --</div>
-        <input type="number" id="mathInput" placeholder="?" autofocus>
+        <div id="questionDisplay" class="question-box">-- + --</div>
+        <input type="number" id="mathInput" placeholder="Type answer..." autofocus>
     </div>
 
-    <!-- Result & Analytics -->
-    <div id="resultScreen" class="screen">
-        <h2>Test Complete! 🏁</h2>
-        <div class="grid">
-            <div class="card">
-                <h3>Performance</h3>
-                <p>Avg Speed: <b id="resAvg"></b>s</p>
-                <canvas id="sessionChart" height="200"></canvas>
-            </div>
-            <div class="card">
-                <h3>Mistake Analysis</h3>
-                <div id="mistakeList" style="font-size: 0.9rem; text-align: left;"></div>
-            </div>
+    <!-- Result Screen -->
+    <div id="result" class="screen">
+        <h3>Session Report</h3>
+        <p>Average Speed: <b id="avgRes">0</b>s</p>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table>
+                <thead><tr><th>Q.</th><th>Solve</th><th>Time</th></tr></thead>
+                <tbody id="resultBody"></tbody>
+            </table>
         </div>
-        <button onclick="showMenu()">Back to Menu</button>
+        <button class="btn-dl" onclick="downloadResult()">Download Result (CSV)</button>
+        <button class="btn-main" onclick="resetApp()">Try Again</button>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboardScreen" class="screen">
-        <h2>Personal Dashboard</h2>
-        <div class="card">
-            <h3>Badges Earned</h3>
-            <div id="badgeContainer"></div>
-        </div>
-        <div class="card">
-            <h3>Improvement Graph</h3>
-            <canvas id="historyChart" height="200"></canvas>
-        </div>
-        <button onclick="showMenu()">Back</button>
+    <!-- History Screen -->
+    <div id="history" class="screen">
+        <h3>Progress Graph</h3>
+        <canvas id="historyChart"></canvas>
+        <button class="btn-outline" onclick="resetApp()">Back</button>
     </div>
 </div>
 
 <script>
-    let currentUser = "";
-    let sessionData = [];
-    let qTimer, overallTimer, correctAnswer, currentQNum, totalQs;
-    let allUsersData = JSON.parse(localStorage.getItem('math_pro_users')) || {};
+    let currentCount, totalQs, correctAnswer, qStartTime, timerInt;
+    let sessionLogs = [];
+    let historyData = JSON.parse(localStorage.getItem('math_pro_history')) || [];
 
-    // --- User Management ---
-    function login() {
-        let name = document.getElementById('userNameInput').value.trim();
-        if(!name) return alert("Naam likhna zaroori hai!");
-        currentUser = name;
-        if(!allUsersData[currentUser]) allUsersData[currentUser] = { history: [], badges: [] };
-        saveData();
-        showMenu();
+    // Theme Toggle
+    function toggleTheme() {
+        const body = document.documentElement;
+        if(body.getAttribute('data-theme') === 'dark') {
+            body.removeAttribute('data-theme');
+            document.getElementById('themeBtn').innerText = '🌙';
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            document.getElementById('themeBtn').innerText = '☀️';
+        }
     }
 
-    function showMenu() {
-        hideAll();
-        document.getElementById('displayUserName').innerText = currentUser;
-        document.getElementById('menuScreen').classList.add('active');
-    }
-
-    function logout() { location.reload(); }
-
-    // --- Game Logic ---
     function startTest() {
         totalQs = parseInt(document.getElementById('qCount').value);
-        currentQNum = 1;
-        sessionData = [];
-        hideAll();
-        document.getElementById('gameScreen').classList.add('active');
+        currentCount = 1; sessionLogs = [];
+        showScreen('game');
         document.getElementById('qTotal').innerText = totalQs;
-        generateNewQuestion();
+        nextQuestion();
     }
 
-    function generateNewQuestion() {
-        if(currentQNum > totalQs) return endTest();
-        
+    function nextQuestion() {
+        if(currentCount > totalQs) return showResults();
         let stage = parseInt(document.getElementById('stageSelect').value);
         let n1, n2;
-        
-        // Stages logic (from previous version)
-        if(stage==1){ n1=r(1,9); n2=r(1,9); }
-        else if(stage==2){ n1=r(10,99); n2=r(10,99); }
-        else if(stage==3){ n1=[10,20,50,100,200,500][r(0,5)]; n2=r(11,99); }
-        else if(stage==4){ n1=r(10,80); n2=r(5, 100-n1); }
-        else if(stage==5){ n1=r(55,99); n2=r(55,99); }
-        else if(stage==6){ let b=[100,200,300,400,500][r(0,4)]; n1=b-r(1,5); n2=r(100,500); }
-        else { n1=r(100,900); n2=r(1000, 9999-n1); }
+        if(stage==1){n1=r(1,9); n2=r(1,9);}
+        else if(stage==2){n1=r(10,99); n2=r(10,99);}
+        else if(stage==3){n1=[10,20,50,100,500][r(0,4)]; n2=r(11,99);}
+        else if(stage==4){n1=r(10,80); n2=r(5,100-n1);}
+        else if(stage==5){n1=r(55,99); n2=r(55,99);}
+        else if(stage==6){let b=[100,200,300,500][r(0,3)]; n1=b-r(1,5); n2=r(100,400);}
+        else {n1=r(100,900); n2=r(1000, 9999-n1);}
 
         correctAnswer = n1 + n2;
         document.getElementById('questionDisplay').innerText = `${n1} + ${n2}`;
-        document.getElementById('qNum').innerText = currentQNum;
+        document.getElementById('qNum').innerText = currentCount;
         document.getElementById('mathInput').value = '';
         document.getElementById('mathInput').focus();
-        qTimer = Date.now();
-        startVisualTimer();
+        qStartTime = Date.now();
+        startTimer();
     }
 
-    function startVisualTimer() {
-        clearInterval(overallTimer);
-        overallTimer = setInterval(() => {
-            let diff = (Date.now() - qTimer) / 1000;
-            document.getElementById('timerDisplay').innerText = diff.toFixed(1) + "s";
+    function startTimer() {
+        clearInterval(timerInt);
+        timerInt = setInterval(() => {
+            document.getElementById('liveTimer').innerText = ((Date.now()-qStartTime)/1000).toFixed(1) + "s";
         }, 100);
     }
 
     document.getElementById('mathInput').addEventListener('input', (e) => {
         if(parseInt(e.target.value) === correctAnswer) {
-            let timeTaken = (Date.now() - qTimer) / 1000;
-            sessionData.push({ q: document.getElementById('questionDisplay').innerText, t: timeTaken });
-            currentQNum++;
-            generateNewQuestion();
+            let timeTaken = (Date.now() - qStartTime) / 1000;
+            sessionLogs.push({ q: document.getElementById('questionDisplay').innerText, t: timeTaken });
+            currentCount++;
+            nextQuestion();
         }
     });
 
-    function endTest() {
-        clearInterval(overallTimer);
-        hideAll();
-        document.getElementById('resultScreen').classList.add('active');
-        
-        let totalTime = sessionData.reduce((a,b) => a + b.t, 0);
-        let avg = (totalTime / totalQs).toFixed(2);
-        document.getElementById('resAvg').innerText = avg;
+    function showResults() {
+        clearInterval(timerInt);
+        showScreen('result');
+        let avg = (sessionLogs.reduce((a,b)=>a+b.t, 0) / totalQs).toFixed(2);
+        document.getElementById('avgRes').innerText = avg;
 
-        // Save progress
-        let stage = document.getElementById('stageSelect').value;
-        allUsersData[currentUser].history.push({ date: new Date().toLocaleDateString(), avg: parseFloat(avg), stage: stage });
-        checkBadges(avg);
-        saveData();
-        renderSessionChart();
+        const tbody = document.getElementById('resultBody');
+        tbody.innerHTML = sessionLogs.map((l, i) => {
+            let color = l.t < 3 ? 'var(--fast)' : (l.t < 6 ? 'var(--mid)' : 'var(--slow)');
+            return `<tr><td>${i+1}</td><td>${l.q}</td><td><span class="tag" style="background:${color}">${l.t.toFixed(2)}s</span></td></tr>`;
+        }).join('');
+
+        historyData.push({ date: new Date().toLocaleDateString(), avg: parseFloat(avg) });
+        localStorage.setItem('math_pro_history', JSON.stringify(historyData));
     }
 
-    // --- Analytics & Charts ---
-    function renderSessionChart() {
-        const ctx = document.getElementById('sessionChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: sessionData.map((_,i)=>i+1),
-                datasets: [{ label: 'Speed (sec)', data: sessionData.map(d=>d.t), borderColor: '#2563eb', tension: 0.3 }]
-            }
-        });
+    function downloadResult() {
+        let csv = "Question,Time(s)\n" + sessionLogs.map(l => `${l.q.replace('+','-')},${l.t}`).join("\n");
+        let blob = new Blob([csv], { type: 'text/csv' });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = `Math_Result_${new Date().getTime()}.csv`;
+        a.click();
     }
 
-    function showDashboard() {
-        hideAll();
-        document.getElementById('dashboardScreen').classList.add('active');
-        const user = allUsersData[currentUser];
-        
-        // Badges
-        document.getElementById('badgeContainer').innerHTML = user.badges.map(b => `<span class="badge-icon" title="${b}">${b}</span>`).join('');
-
-        // History Chart
+    function showHistory() {
+        showScreen('history');
         const ctx = document.getElementById('historyChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: user.history.map(h => h.date),
-                datasets: [{ label: 'Avg Speed Trend', data: user.history.map(h => h.avg), borderColor: '#22c55e' }]
+                labels: historyData.map(h => h.date),
+                datasets: [{ label: 'Avg Speed Trend', data: historyData.map(h => h.avg), borderColor: '#2563eb' }]
             }
         });
     }
 
-    function checkBadges(avg) {
-        let badges = allUsersData[currentUser].badges;
-        if(avg < 2 && !badges.includes('⚡ Flash')) badges.push('⚡ Flash');
-        if(totalQs >= 20 && !badges.includes('🔋 Marathoner')) badges.push('🔋 Marathoner');
-        if(!badges.includes('🎯 First Step')) badges.push('🎯 First Step');
-    }
-
-    // --- Helper Functions ---
     function r(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
-    function hideAll() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); }
-    function saveData() { localStorage.setItem('math_pro_users', JSON.stringify(allUsersData)); }
-
-    // Init User List
-    (function init() {
-        let list = document.getElementById('existingUsers');
-        Object.keys(allUsersData).forEach(user => {
-            let btn = document.createElement('button');
-            btn.innerText = user;
-            btn.className = "btn-secondary";
-            btn.style.width = "auto";
-            btn.style.marginRight = "5px";
-            btn.onclick = () => { document.getElementById('userNameInput').value = user; login(); };
-            list.appendChild(btn);
-        });
-    })();
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+    function resetApp() { showScreen('setup'); }
 </script>
 </body>
 </html>
